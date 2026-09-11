@@ -18,11 +18,9 @@
     transition: opacity 0.6s;
   }
   .hidden { opacity:0; pointer-events:none; }
-
   #s1 h1 { font-size: 21px; margin-bottom: 40px; line-height:1.8; font-weight: 500; }
   #s1 .hint { font-size: 13px; opacity: 0.5; margin-top: 24px; animation: pulse 1.5s infinite; }
   @keyframes pulse { 0%,100% { opacity:0.4 } 50% { opacity:1 } }
-
   .heart-btn {
     width: 140px; height: 140px; border-radius: 50%;
     background: radial-gradient(circle at 30% 30%, #ff5c8a, #d1004a);
@@ -37,7 +35,6 @@
     30% { transform: scale(1); }
     45% { transform: scale(1.1); }
   }
-
   #s2 .msg {
     font-size: 19px; line-height: 1.9; max-width: 320px;
     position: absolute;
@@ -48,8 +45,6 @@
   #s2 .msg.long { font-size: 16px; line-height: 2; }
   #s2 .msg.show { opacity:1; transform: translateY(0) scale(1); }
   #s2 .emoji { font-size: 44px; display:block; margin-bottom: 18px; }
-
-  /* ====== صحنه‌ی تایپ ====== */
   #s3 h2 { font-size: 19px; margin-bottom: 20px; font-weight: 500; }
   #s3 .sub { font-size: 13px; opacity: 0.6; margin-bottom: 22px; }
   #answer {
@@ -63,7 +58,6 @@
   }
   #answer:focus { border-color: #ff5c8a; box-shadow: 0 0 20px rgba(255,92,138,0.4); }
   #answer::placeholder { color: rgba(255,255,255,0.35); }
-
   .send-btn {
     margin-top: 18px;
     padding: 14px 44px;
@@ -75,8 +69,6 @@
     transition: transform 0.2s;
   }
   .send-btn:active { transform: scale(0.95); }
-
-  /* ====== صفحه‌ی آخر ====== */
   #final h1 {
     font-size: 24px; line-height: 1.9; max-width: 320px;
     background: linear-gradient(90deg,#ff5c8a,#ffb84d,#ff5c8a);
@@ -86,7 +78,6 @@
     padding: 0 10px;
   }
   @keyframes shimmer { 0%{background-position:0% 50%} 100%{background-position:200% 50%} }
-
   canvas#confetti { position:fixed; inset:0; pointer-events:none; z-index:99; }
 </style>
 </head>
@@ -114,13 +105,8 @@
 </div>
 
 <script>
-// ============================================================
-// ⚙️ تنظیمات — فقط یوزرنیم خودت رو بذار!
-// ============================================================
-const TELEGRAM_USERNAME = "najmeh1900";   // 👈 بدون @
-// ============================================================
+const TELEGRAM_USERNAME = "najmeh1900";
 
-// ============ پیام‌های وسط ============
 const messages = [
   {
     emoji: "💌",
@@ -137,10 +123,8 @@ const messages = [
   }
 ];
 
-// ============ پیام آخر (قبل از رفتن به تلگرام) ============
 const finalMessage = "جوابت داره میره پیش نجمه،<br>خدا به دادت برسه 😏";
 
-// ============ کد ============
 const s1 = document.getElementById("s1");
 const s2 = document.getElementById("s2");
 const s3 = document.getElementById("s3");
@@ -182,20 +166,17 @@ function showMessages() {
     s2.appendChild(el);
     vibrate(30);
     requestAnimationFrame(() => setTimeout(() => el.classList.add("show"), 50));
-
     const showTime = m.long ? 4500 : 2800;
     setTimeout(() => {
       el.classList.remove("show");
       setTimeout(() => el.remove(), 800);
     }, showTime);
-
     i++;
     setTimeout(next, showTime + 500);
   };
   next();
 }
 
-// ============ ارسال جواب ============
 document.getElementById("sendBtn").addEventListener("click", () => {
   const text = document.getElementById("answer").value.trim();
   if (!text) {
@@ -204,29 +185,18 @@ document.getElementById("sendBtn").addEventListener("click", () => {
     vibrate([50, 30, 50]);
     return;
   }
-
-  // ویبره‌ی هیجانی
   vibrate([60, 40, 60, 40, 150]);
-
-  // آماده کردن لینک تلگرام
   const fullMsg = `💌 جواب سورپرایزت:\n\n${text}`;
   const url = `https://t.me/${TELEGRAM_USERNAME}?text=${encodeURIComponent(fullMsg)}`;
-
-  // برو به صفحه‌ی آخر
   hideScene(s3);
   setTimeout(() => {
     showScene(finalScene);
     document.getElementById("finalText").innerHTML = finalMessage;
     fireConfetti();
-
-    // ۲ ثانیه بعد، تلگرام باز میشه
-    setTimeout(() => {
-      window.location.href = url;
-    }, 2000);
+    setTimeout(() => { window.location.href = url; }, 2000);
   }, 600);
 });
 
-// ============ کانفتی ============
 const canvas = document.getElementById("confetti");
 const ctx = canvas.getContext("2d");
 let pieces = [], animating = false;
@@ -268,7 +238,6 @@ function animate() {
     ctx.restore();
   });
   pieces = pieces.filter(p => p.y < canvas.height + 30);
-
   if (pieces.length) requestAnimationFrame(animate);
   else animating = false;
 }
