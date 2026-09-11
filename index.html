@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>❤️</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html, body { height:100%; overflow:hidden; font-family: Tahoma, sans-serif; }
+  body {
+    background: radial-gradient(circle at 50% 50%, #1a0022, #000);
+    color: #fff; display:flex; justify-content:center; align-items:center;
+    text-align:center; user-select:none;
+  }
+  .scene {
+    position:fixed; inset:0; display:flex; flex-direction:column;
+    justify-content:center; align-items:center; padding:28px;
+    transition: opacity 0.6s;
+  }
+  .hidden { opacity:0; pointer-events:none; }
+
+  #s1 h1 { font-size: 21px; margin-bottom: 40px; line-height:1.8; font-weight: 500; }
+  #s1 .hint { font-size: 13px; opacity: 0.5; margin-top: 24px; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100% { opacity:0.4 } 50% { opacity:1 } }
+
+  .heart-btn {
+    width: 140px; height: 140px; border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #ff5c8a, #d1004a);
+    box-shadow: 0 0 50px rgba(255, 50, 100, 0.7), inset 0 0 30px rgba(255,255,255,0.2);
+    display:flex; justify-content:center; align-items:center;
+    font-size: 60px; border: none; color: white; cursor: pointer;
+    animation: beat 1.2s infinite;
+  }
+  @keyframes beat {
+    0%,100% { transform: scale(1); }
+    15% { transform: scale(1.15); }
+    30% { transform: scale(1); }
+    45% { transform: scale(1.1); }
+  }
+
+  #s2 .msg {
+    font-size: 19px; line-height: 1.9; max-width: 320px;
+    position: absolute;
+    opacity:0; transform: translateY(20px) scale(0.95);
+    transition: all 0.8s ease;
+    padding: 0 10px;
+  }
+  #s2 .msg.long { font-size: 16px; line-height: 2; }
+  #s2 .msg.show { opacity:1; transform: translateY(0) scale(1); }
+  #s2 .emoji { font-size: 44px; display:block; margin-bottom: 18px; }
+
+  /* ====== صحنه‌ی تایپ ====== */
+  #s3 h2 { font-size: 19px; margin-bottom: 20px; font-weight: 500; }
+  #s3 .sub { font-size: 13px; opacity: 0.6; margin-bottom: 22px; }
+  #answer {
+    width: 100%; max-width: 320px; height: 130px;
+    background: rgba(255,255,255,0.08);
+    border: 1.5px solid rgba(255,92,138,0.4);
+    border-radius: 18px;
+    color: #fff; font-family: Tahoma, sans-serif; font-size: 16px;
+    padding: 16px; resize: none; outline: none;
+    line-height: 1.8;
+  }
+  #answer:focus { border-color: #ff5c8a; box-shadow: 0 0 20px rgba(255,92,138,0.4); }
+  #answer::placeholder { color: rgba(255,255,255,0.35); }
+
+  .send-btn {
+    margin-top: 18px;
+    padding: 14px 44px;
+    font-size: 17px; font-family: Tahoma, sans-serif;
+    border: none; border-radius: 50px;
+    background: linear-gradient(135deg, #ff5c8a, #d1004a);
+    color: #fff; cursor: pointer; font-weight: bold;
+    box-shadow: 0 8px 30px rgba(255,50,100,0.5);
+    transition: transform 0.2s;
+  }
+  .send-btn:active { transform: scale(0.95); }
+
+  /* ====== صفحه‌ی آخر ====== */
+  #final h1 {
+    font-size: 24px; line-height: 1.9; max-width: 320px;
+    background: linear-gradient(90deg,#ff5c8a,#ffb84d,#ff5c8a);
+    background-size: 200% 100%;
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    animation: shimmer 3s infinite;
+    padding: 0 10px;
+  }
+  @keyframes shimmer { 0%{background-position:0% 50%} 100%{background-position:200% 50%} }
+
+  canvas#confetti { position:fixed; inset:0; pointer-events:none; z-index:99; }
+</style>
+</head>
+<body>
+
+<canvas id="confetti"></canvas>
+
+<div class="scene" id="s1">
+  <h1>یه چیزی برات دارم...<br>ولی باید خودت بازش کنی 😏</h1>
+  <button class="heart-btn" id="startBtn">❤️</button>
+  <div class="hint">روی قلب بزن</div>
+</div>
+
+<div class="scene hidden" id="s2"></div>
+
+<div class="scene hidden" id="s3">
+  <h2>خب... بنویس ببینم 😏</h2>
+  <div class="sub">جوابت مستقیم میاد برام 💌</div>
+  <textarea id="answer" placeholder="اینجا بنویس..."></textarea>
+  <button class="send-btn" id="sendBtn">بفرست 💘</button>
+</div>
+
+<div class="scene hidden" id="final">
+  <h1 id="finalText"></h1>
+</div>
+
+<script>
+// ============================================================
+// ⚙️ تنظیمات — فقط یوزرنیم خودت رو بذار!
+// ============================================================
+const TELEGRAM_USERNAME = "najmeh1900";   // 👈 بدون @
+// ============================================================
+
+// ============ پیام‌های وسط ============
+const messages = [
+  {
+    emoji: "💌",
+    text: "جناب آقای رسول،<br>یک نامه از طرف عجیب‌ترین موجود دنیا داری<br>ولی فقط مخصوص تویه<br>اگه نمی‌دونی کیه بازش نکن",
+    long: true
+  },
+  {
+    emoji: "🤨",
+    text: "الان به من فکر کردی<br>یا کسی دیگه اومد تو ذهنت؟"
+  },
+  {
+    emoji: "👀",
+    text: "خب الان دوس داری چی بگم؟"
+  }
+];
+
+// ============ پیام آخر (قبل از رفتن به تلگرام) ============
+const finalMessage = "جوابت داره میره پیش نجمه،<br>خدا به دادت برسه 😏";
+
+// ============ کد ============
+const s1 = document.getElementById("s1");
+const s2 = document.getElementById("s2");
+const s3 = document.getElementById("s3");
+const finalScene = document.getElementById("final");
+
+function vibrate(p) { if (navigator.vibrate) navigator.vibrate(p); }
+
+function hideScene(el) {
+  el.classList.add("hidden");
+  setTimeout(() => { el.style.display = "none"; }, 600);
+}
+function showScene(el) {
+  el.style.display = "flex";
+  requestAnimationFrame(() => el.classList.remove("hidden"));
+}
+
+document.getElementById("startBtn").addEventListener("click", start, { once: true });
+
+function start() {
+  vibrate([30, 50, 30]);
+  hideScene(s1);
+  setTimeout(() => { showScene(s2); showMessages(); }, 600);
+}
+
+function showMessages() {
+  let i = 0;
+  const next = () => {
+    if (i >= messages.length) {
+      setTimeout(() => {
+        hideScene(s2);
+        setTimeout(() => { showScene(s3); }, 600);
+      }, 1200);
+      return;
+    }
+    const m = messages[i];
+    const el = document.createElement("div");
+    el.className = "msg" + (m.long ? " long" : "");
+    el.innerHTML = `<span class="emoji">${m.emoji}</span>${m.text}`;
+    s2.appendChild(el);
+    vibrate(30);
+    requestAnimationFrame(() => setTimeout(() => el.classList.add("show"), 50));
+
+    const showTime = m.long ? 4500 : 2800;
+    setTimeout(() => {
+      el.classList.remove("show");
+      setTimeout(() => el.remove(), 800);
+    }, showTime);
+
+    i++;
+    setTimeout(next, showTime + 500);
+  };
+  next();
+}
+
+// ============ ارسال جواب ============
+document.getElementById("sendBtn").addEventListener("click", () => {
+  const text = document.getElementById("answer").value.trim();
+  if (!text) {
+    document.getElementById("answer").placeholder = "اول یه چیزی بنویس 😅";
+    document.getElementById("answer").focus();
+    vibrate([50, 30, 50]);
+    return;
+  }
+
+  // ویبره‌ی هیجانی
+  vibrate([60, 40, 60, 40, 150]);
+
+  // آماده کردن لینک تلگرام
+  const fullMsg = `💌 جواب سورپرایزت:\n\n${text}`;
+  const url = `https://t.me/${TELEGRAM_USERNAME}?text=${encodeURIComponent(fullMsg)}`;
+
+  // برو به صفحه‌ی آخر
+  hideScene(s3);
+  setTimeout(() => {
+    showScene(finalScene);
+    document.getElementById("finalText").innerHTML = finalMessage;
+    fireConfetti();
+
+    // ۲ ثانیه بعد، تلگرام باز میشه
+    setTimeout(() => {
+      window.location.href = url;
+    }, 2000);
+  }, 600);
+});
+
+// ============ کانفتی ============
+const canvas = document.getElementById("confetti");
+const ctx = canvas.getContext("2d");
+let pieces = [], animating = false;
+
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener("resize", resize);
+
+function fireConfetti() {
+  const colors = ["#ff5c8a", "#ffb84d", "#ff8fa3", "#ffffff", "#ff4d6d", "#ffd166"];
+  for (let i = 0; i < 150; i++) {
+    pieces.push({
+      x: Math.random() * canvas.width,
+      y: -20 - Math.random() * 300,
+      w: 6 + Math.random() * 6,
+      h: 8 + Math.random() * 8,
+      vy: 2 + Math.random() * 3.5,
+      vx: -1.5 + Math.random() * 3,
+      rot: Math.random() * Math.PI,
+      vr: -0.15 + Math.random() * 0.3,
+      color: colors[Math.floor(Math.random() * colors.length)]
+    });
+  }
+  if (!animating) { animating = true; requestAnimationFrame(animate); }
+}
+
+function animate() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  pieces.forEach(p => {
+    p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate(p.rot);
+    ctx.fillStyle = p.color;
+    ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+    ctx.restore();
+  });
+  pieces = pieces.filter(p => p.y < canvas.height + 30);
+
+  if (pieces.length) requestAnimationFrame(animate);
+  else animating = false;
+}
+</script>
+</body>
+</html>
