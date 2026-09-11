@@ -254,31 +254,23 @@ function showMessages() {
     vibrate(30);
     requestAnimationFrame(() => setTimeout(() => el.classList.add("show"), 50));
 
-    // افکت تایپ
-    const textSpan = el.querySelector(".text");
-    let charIdx = 0;
-    const typeChar = () => {
-      if (charIdx < m.text.length) {
-        textSpan.textContent += m.text[charIdx];
-        charIdx++;
-        setTimeout(typeChar, 45);
-      }
-    };
-    setTimeout(typeChar, 400);
+  
+   // افکت تایپ
+const textSpan = el.querySelector(".text");
+let charIdx = 0;
+const typeChar = () => {
+  if (charIdx < m.text.length) {
+    textSpan.textContent += m.text[charIdx];
+    charIdx++;
+    setTimeout(typeChar, 70);   // سرعت تایپ (بزرگ‌تر = آروم‌تر)
+  }
+};
+setTimeout(typeChar, 500);
 
-    // مدت نمایش: تایپ + مکث
-    const typingTime = m.text.length * 45 + 800;
-    const showTime = Math.max(typingTime, m.long ? 4500 : 2800);
-
-    setTimeout(() => {
-      el.classList.remove("show");
-      setTimeout(() => el.remove(), 800);
-    }, showTime);
-
-    i++;
-    setTimeout(next, showTime + 500);
-  };
-  next();
+// مدت تایپ + مکث بعدش (تا بتونه بخونه)
+const typingTime = m.text.length * 70 + 500;
+const pauseAfterTyping = m.long ? 3500 : 2500;  // مکث بعد از تایپ
+const showTime = typingTime + pauseAfterTyping;
 }
 
 // ============ ارسال جواب ============
