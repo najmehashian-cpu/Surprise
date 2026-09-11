@@ -192,7 +192,8 @@ document.getElementById("sendBtn").addEventListener("click", () => {
   vibrate([60, 40, 60, 40, 150]);
 
   const fullMsg = `💌 جواب سورپرایزت:\n\n${text}`;
-  const url = `https://t.me/${TELEGRAM_USERNAME}?text=${encodeURIComponent(fullMsg)}`;
+ const textEncoded = encodeURIComponent(fullMsg);
+const url = `tg://resolve?domain=${TELEGRAM_USERNAME}&text=${textEncoded}`;
 
   hideScene(s3);
   setTimeout(() => {
