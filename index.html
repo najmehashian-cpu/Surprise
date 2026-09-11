@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
@@ -102,6 +103,9 @@
 
 <div class="scene hidden" id="final">
   <h1 id="finalText"></h1>
+  <a id="goTelegram" class="send-btn" style="margin-top:30px; text-decoration:none; display:none;">
+    برو به تلگرام 💌
+  </a>
 </div>
 
 <script>
@@ -185,15 +189,22 @@ document.getElementById("sendBtn").addEventListener("click", () => {
     vibrate([50, 30, 50]);
     return;
   }
+
   vibrate([60, 40, 60, 40, 150]);
+
   const fullMsg = `💌 جواب سورپرایزت:\n\n${text}`;
   const url = `https://t.me/${TELEGRAM_USERNAME}?text=${encodeURIComponent(fullMsg)}`;
+
   hideScene(s3);
   setTimeout(() => {
     showScene(finalScene);
     document.getElementById("finalText").innerHTML = finalMessage;
     fireConfetti();
-    setTimeout(() => { window.location.href = url; }, 2000);
+
+    const goBtn = document.getElementById("goTelegram");
+    goBtn.href = url;
+    goBtn.style.display = "inline-block";
+    goBtn.style.animation = "beat 1.2s infinite";
   }, 600);
 });
 
