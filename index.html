@@ -13,7 +13,21 @@
     text-align:center; user-select:none;
   }
 
-  /* ====== قلب‌های شناور در پس‌زمینه ====== */
+  /* ====== هشدار تلگرام ====== */
+  #tgWarning {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.95);
+    z-index: 9999;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 30px;
+    text-align: center;
+  }
+  #tgWarning.show { display: flex; }
+
+  /* ====== قلب‌های شناور ====== */
   #floatingHearts {
     position: fixed; inset: 0;
     pointer-events: none; overflow: hidden; z-index: 0;
@@ -30,7 +44,7 @@
     100% { transform: translateY(-115vh) rotate(360deg); opacity: 0; }
   }
 
-  /* ====== انفجار قلب روی لمس ====== */
+  /* ====== انفجار قلب ====== */
   .burst-heart {
     position: fixed;
     pointer-events: none;
@@ -114,6 +128,17 @@
 </head>
 <body>
 
+<!-- هشدار تلگرام -->
+<div id="tgWarning">
+  <div style="font-size:60px; margin-bottom:20px;">🔒</div>
+  <h2 style="font-size:20px; line-height:1.8; margin-bottom:16px; color:#fff;">برای تجربه‌ی بهتر</h2>
+  <p style="font-size:15px; line-height:1.9; color:#ccc; max-width:300px;">
+    لطفاً از منوی بالا (⋯) گزینه‌ی<br>
+    <b style="color:#ff5c8a;">«Open in Browser»</b><br>
+    رو بزن و صفحه رو تو Chrome باز کن 💕
+  </p>
+</div>
+
 <div id="floatingHearts"></div>
 <canvas id="confetti"></canvas>
 
@@ -134,7 +159,8 @@
 
 <div class="scene hidden" id="final">
   <h1 id="finalText"></h1>
-  <a id="goTelegram" class="send-btn" style="margin-top:30px; text-decoration:none; display:none;"> عه،اینجا ارسال نشد،بزن برو تلگرام بگو همینو 💌
+  <a id="goTelegram" class="send-btn" style="margin-top:30px; text-decoration:none; display:none;">
+    عه اینجا ارسال نشد! بزن رو دکمه برو 👉
   </a>
 </div>
 
@@ -144,7 +170,7 @@
 // ============================================================
 const TELEGRAM_USERNAME = "najmeh1900";
 
-// ============ پیام‌ها (به جای <br> از \n استفاده کن) ============
+// ============ پیام‌ها ============
 const messages = [
   {
     emoji: "💌",
@@ -162,6 +188,18 @@ const messages = [
 ];
 
 const finalMessage = "جوابت داره میره پیش نجمه،<br>خدا به دادت برسه 😏";
+
+// ============ تشخیص تلگرام / اینستاگرام / ... ============
+const ua = navigator.userAgent.toLowerCase();
+const isTelegram = ua.includes("telegram");
+const isInstagram = ua.includes("instagram");
+const isInApp = isTelegram || isInstagram || ua.includes("fbav") || ua.includes("line/");
+
+if (isInApp) {
+  document.getElementById("tgWarning").classList.add("show");
+  // جلوگیری از اجرای بقیه‌ی اسکریپت
+  throw new Error("In-app browser detected");
+}
 
 // ============ کد اصلی ============
 const s1 = document.getElementById("s1");
@@ -254,23 +292,32 @@ function showMessages() {
     vibrate(30);
     requestAnimationFrame(() => setTimeout(() => el.classList.add("show"), 50));
 
-  
-   // افکت تایپ
-const textSpan = el.querySelector(".text");
-let charIdx = 0;
-const typeChar = () => {
-  if (charIdx < m.text.length) {
-    textSpan.textContent += m.text[charIdx];
-    charIdx++;
-    setTimeout(typeChar, 70);   // سرعت تایپ (بزرگ‌تر = آروم‌تر)
-  }
-};
-setTimeout(typeChar, 500);
+    // افکت تایپ
+    const textSpan = el.querySelector(".text");
+    let charIdx = 0;
+    const typeChar = () => {
+      if (charIdx < m.text.length) {
+        textSpan.textContent += m.text[charIdx];
+        charIdx++;
+        setTimeout(typeChar, 70);
+      }
+    };
+    setTimeout(typeChar, 500);
 
-// مدت تایپ + مکث بعدش (تا بتونه بخونه)
-const typingTime = m.text.length * 70 + 500;
-const pauseAfterTyping = m.long ? 3500 : 2500;  // مکث بعد از تایپ
-const showTime = typingTime + pauseAfterTyping;
+    // مدت تایپ + مکث بعدش
+    const typingTime = m.text.length * 70 + 500;
+    const pauseAfterTyping = m.long ? 3500 : 2500;
+    const showTime = typingTime + pauseAfterTyping;
+
+    setTimeout(() => {
+      el.classList.remove("show");
+      setTimeout(() => el.remove(), 800);
+    }, showTime);
+
+    i++;
+    setTimeout(next, showTime + 500);
+  };
+  next();
 }
 
 // ============ ارسال جواب ============
@@ -284,7 +331,8 @@ document.getElementById("sendBtn").addEventListener("click", () => {
   }
 
   vibrate([60, 40, 60, 40, 150]);
-const fullMsg = `عه اینجا ارسال نشد، بزن رو دکمه برو 😂\n\n💌 جواب سورپرایزت:\n${text}`;
+
+  const fullMsg = `عه اینجا ارسال نشد، بزن رو دکمه برو 😂\n\n💌 جواب سورپرایزت:\n${text}`;
   const textEncoded = encodeURIComponent(fullMsg);
   const tgUrl = `tg://resolve?domain=${TELEGRAM_USERNAME}&text=${textEncoded}`;
   const webUrl = `https://t.me/${TELEGRAM_USERNAME}?text=${textEncoded}`;
