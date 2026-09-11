@@ -12,6 +12,36 @@
     color: #fff; display:flex; justify-content:center; align-items:center;
     text-align:center; user-select:none;
   }
+
+  /* ====== قلب‌های شناور در پس‌زمینه ====== */
+  #floatingHearts {
+    position: fixed; inset: 0;
+    pointer-events: none; overflow: hidden; z-index: 0;
+  }
+  .float-heart {
+    position: absolute; bottom: -60px;
+    opacity: 0;
+    animation: floatUp linear forwards;
+  }
+  @keyframes floatUp {
+    0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+    10% { opacity: 0.7; }
+    90% { opacity: 0.7; }
+    100% { transform: translateY(-115vh) rotate(360deg); opacity: 0; }
+  }
+
+  /* ====== انفجار قلب روی لمس ====== */
+  .burst-heart {
+    position: fixed;
+    pointer-events: none;
+    z-index: 999;
+    animation: burst 0.8s ease-out forwards;
+  }
+  @keyframes burst {
+    0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.2); opacity: 0; }
+  }
+
   .scene {
     position:fixed; inset:0; display:flex; flex-direction:column;
     justify-content:center; align-items:center; padding:28px;
@@ -41,6 +71,7 @@
     opacity:0; transform: translateY(20px) scale(0.95);
     transition: all 0.8s ease;
     padding: 0 10px;
+    white-space: pre-line;
   }
   #s2 .msg.long { font-size: 16px; line-height: 2; }
   #s2 .msg.show { opacity:1; transform: translateY(0) scale(1); }
@@ -83,6 +114,7 @@
 </head>
 <body>
 
+<div id="floatingHearts"></div>
 <canvas id="confetti"></canvas>
 
 <div class="scene" id="s1">
@@ -102,23 +134,26 @@
 
 <div class="scene hidden" id="final">
   <h1 id="finalText"></h1>
-  <a id="goTelegram" class="send-btn" style="margin-top:30px; text-decoration:none; display:none;">
-    برو به تلگرام 💌
+  <a id="goTelegram" class="send-btn" style="margin-top:30px; text-decoration:none; display:none;"> عه،اینجا ارسال نشد،بزن برو تلگرام بگو همینو 💌
   </a>
 </div>
 
 <script>
+// ============================================================
+// ⚙️ تنظیمات
+// ============================================================
 const TELEGRAM_USERNAME = "najmeh1900";
 
+// ============ پیام‌ها (به جای <br> از \n استفاده کن) ============
 const messages = [
   {
     emoji: "💌",
-    text: "رسول جان،<br>تو به عنوان عجیب‌ترین موجود دنیا برگزیده شدی<br>تا پیامی رو از مظلوم‌ترین فرشته دنیا دریافت کنی",
+    text: "رسول جان،\nتو به عنوان عجیب‌ترین موجود دنیا برگزیده شدی\nتا پیامی رو از مظلوم‌ترین فرشته دنیا دریافت کنی",
     long: true
   },
   {
     emoji: "🤨",
-    text: "الان به من فکر کردی<br>یا کسی دیگه اومد تو ذهنت؟"
+    text: "الان به من فکر کردی\nیا کسی دیگه اومد تو ذهنت؟"
   },
   {
     emoji: "👀",
@@ -128,6 +163,7 @@ const messages = [
 
 const finalMessage = "جوابت داره میره پیش نجمه،<br>خدا به دادت برسه 😏";
 
+// ============ کد اصلی ============
 const s1 = document.getElementById("s1");
 const s2 = document.getElementById("s2");
 const s3 = document.getElementById("s3");
@@ -144,6 +180,53 @@ function showScene(el) {
   requestAnimationFrame(() => el.classList.remove("hidden"));
 }
 
+// ============ قلب‌های شناور ============
+const heartEmojis = ["❤️", "💕", "💖", "💗", "💓", "🩷"];
+const floatingContainer = document.getElementById("floatingHearts");
+
+function spawnFloatingHeart() {
+  const el = document.createElement("div");
+  el.className = "float-heart";
+  el.textContent = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
+  el.style.left = Math.random() * 100 + "%";
+  el.style.fontSize = (14 + Math.random() * 18) + "px";
+  const dur = 6 + Math.random() * 5;
+  el.style.animationDuration = dur + "s";
+  floatingContainer.appendChild(el);
+  setTimeout(() => el.remove(), dur * 1000);
+}
+setInterval(spawnFloatingHeart, 700);
+for (let i = 0; i < 5; i++) setTimeout(spawnFloatingHeart, i * 200);
+
+// ============ انفجار قلب روی لمس ============
+function burstHearts(x, y) {
+  const emojis = ["❤️", "💕", "💖", "💗", "💓", "🩷"];
+  const count = 6;
+  for (let i = 0; i < count; i++) {
+    const el = document.createElement("div");
+    el.className = "burst-heart";
+    el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    el.style.left = x + "px";
+    el.style.top = y + "px";
+    el.style.fontSize = (16 + Math.random() * 12) + "px";
+    const angle = (Math.PI * 2 / count) * i + Math.random() * 0.6;
+    const dist = 60 + Math.random() * 50;
+    el.style.setProperty("--dx", Math.cos(angle) * dist + "px");
+    el.style.setProperty("--dy", Math.sin(angle) * dist + "px");
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 800);
+  }
+}
+
+document.addEventListener("click", (e) => {
+  burstHearts(e.clientX, e.clientY);
+});
+document.addEventListener("touchstart", (e) => {
+  const t = e.touches[0];
+  burstHearts(t.clientX, t.clientY);
+}, { passive: true });
+
+// ============ شروع ============
 document.getElementById("startBtn").addEventListener("click", start, { once: true });
 
 function start() {
@@ -152,6 +235,7 @@ function start() {
   setTimeout(() => { showScene(s2); showMessages(); }, 600);
 }
 
+// ============ نمایش پیام‌ها با افکت تایپ ============
 function showMessages() {
   let i = 0;
   const next = () => {
@@ -165,21 +249,39 @@ function showMessages() {
     const m = messages[i];
     const el = document.createElement("div");
     el.className = "msg" + (m.long ? " long" : "");
-    el.innerHTML = `<span class="emoji">${m.emoji}</span>${m.text}`;
+    el.innerHTML = `<span class="emoji">${m.emoji}</span><span class="text"></span>`;
     s2.appendChild(el);
     vibrate(30);
     requestAnimationFrame(() => setTimeout(() => el.classList.add("show"), 50));
-    const showTime = m.long ? 4500 : 2800;
+
+    // افکت تایپ
+    const textSpan = el.querySelector(".text");
+    let charIdx = 0;
+    const typeChar = () => {
+      if (charIdx < m.text.length) {
+        textSpan.textContent += m.text[charIdx];
+        charIdx++;
+        setTimeout(typeChar, 45);
+      }
+    };
+    setTimeout(typeChar, 400);
+
+    // مدت نمایش: تایپ + مکث
+    const typingTime = m.text.length * 45 + 800;
+    const showTime = Math.max(typingTime, m.long ? 4500 : 2800);
+
     setTimeout(() => {
       el.classList.remove("show");
       setTimeout(() => el.remove(), 800);
     }, showTime);
+
     i++;
     setTimeout(next, showTime + 500);
   };
   next();
 }
 
+// ============ ارسال جواب ============
 document.getElementById("sendBtn").addEventListener("click", () => {
   const text = document.getElementById("answer").value.trim();
   if (!text) {
@@ -190,10 +292,10 @@ document.getElementById("sendBtn").addEventListener("click", () => {
   }
 
   vibrate([60, 40, 60, 40, 150]);
-
-  const fullMsg = `💌 جواب سورپرایزت:\n\n${text}`;
- const textEncoded = encodeURIComponent(fullMsg);
-const url = `tg://resolve?domain=${TELEGRAM_USERNAME}&text=${textEncoded}`;
+const fullMsg = `عه اینجا ارسال نشد، بزن رو دکمه برو 😂\n\n💌 جواب سورپرایزت:\n${text}`;
+  const textEncoded = encodeURIComponent(fullMsg);
+  const tgUrl = `tg://resolve?domain=${TELEGRAM_USERNAME}&text=${textEncoded}`;
+  const webUrl = `https://t.me/${TELEGRAM_USERNAME}?text=${textEncoded}`;
 
   hideScene(s3);
   setTimeout(() => {
@@ -202,12 +304,18 @@ const url = `tg://resolve?domain=${TELEGRAM_USERNAME}&text=${textEncoded}`;
     fireConfetti();
 
     const goBtn = document.getElementById("goTelegram");
-    goBtn.href = url;
     goBtn.style.display = "inline-block";
     goBtn.style.animation = "beat 1.2s infinite";
+
+    goBtn.onclick = (e) => {
+      e.preventDefault();
+      window.location.href = tgUrl;
+      setTimeout(() => { window.location.href = webUrl; }, 800);
+    };
   }, 600);
 });
 
+// ============ کانفتی ============
 const canvas = document.getElementById("confetti");
 const ctx = canvas.getContext("2d");
 let pieces = [], animating = false;
