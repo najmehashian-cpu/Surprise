@@ -27,6 +27,90 @@
   }
   #tgWarning.show { display: flex; }
 
+  /* ====== هشدار بستن ====== */
+  #exitWarning {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(20, 0, 30, 0.95);
+    z-index: 9998;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 30px;
+    text-align: center;
+    backdrop-filter: blur(8px);
+  }
+  #exitWarning.show { display: flex; animation: fadeIn 0.3s; }
+  @keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
+  #exitWarning .emoji { font-size: 70px; margin-bottom: 20px; animation: beat 1.2s infinite; }
+  #exitWarning h2 { font-size: 24px; color: #ff5c8a; margin-bottom: 16px; font-weight: bold; }
+  #exitWarning p { font-size: 16px; line-height: 1.9; color: #ddd; max-width: 320px; margin-bottom: 30px; }
+  #exitWarning .stay-btn {
+    padding: 14px 44px;
+    font-size: 17px; font-family: Tahoma, sans-serif;
+    border: none; border-radius: 50px;
+    background: linear-gradient(135deg, #ff5c8a, #d1004a);
+    color: #fff; cursor: pointer; font-weight: bold;
+    box-shadow: 0 8px 30px rgba(255,50,100,0.5);
+  }
+
+  /* ====== صحنه‌ی هک ====== */
+  #hacked {
+    background: #000;
+    z-index: 100;
+  }
+  #hacked .skull {
+    font-size: 110px;
+    filter: drop-shadow(0 0 30px #ff0033) drop-shadow(0 0 60px #ff0033);
+    animation: skullShake 0.15s infinite;
+    margin-bottom: 20px;
+  }
+  @keyframes skullShake {
+    0%,100% { transform: translate(0,0) rotate(0deg); }
+    25% { transform: translate(-4px, 3px) rotate(-3deg); }
+    50% { transform: translate(4px, -3px) rotate(3deg); }
+    75% { transform: translate(-3px, -4px) rotate(-2deg); }
+  }
+  #hacked .glitch-text {
+    font-size: 36px;
+    font-weight: bold;
+    color: #ff0033;
+    font-family: monospace;
+    letter-spacing: 6px;
+    margin: 15px 0 25px 0;
+    text-shadow: 3px 0 #00ffcc, -3px 0 #ff0066;
+    animation: glitch 0.25s infinite;
+  }
+  @keyframes glitch {
+    0%,100% { transform: translate(0,0); }
+    20% { transform: translate(-2px, 1px); }
+    40% { transform: translate(2px, -1px); }
+    60% { transform: translate(-1px, -2px); }
+    80% { transform: translate(1px, 2px); }
+  }
+  #hacked .hack-lines {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    color: #00ff66;
+    direction: ltr;
+    text-align: left;
+    line-height: 1.9;
+    min-height: 120px;
+    max-width: 300px;
+    text-shadow: 0 0 5px #00ff66;
+  }
+  #hacked .flicker {
+    position: fixed; inset: 0;
+    background: rgba(255, 0, 50, 0.18);
+    pointer-events: none;
+    z-index: 101;
+    animation: flickerAnim 0.12s infinite;
+  }
+  @keyframes flickerAnim {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
+  }
+
   /* ====== قلب‌های شناور ====== */
   #floatingHearts {
     position: fixed; inset: 0;
@@ -79,7 +163,7 @@
     30% { transform: scale(1); }
     45% { transform: scale(1.1); }
   }
-  #s2 .msg {
+  #s2 .msg, #sHackMsg .msg {
     font-size: 19px; line-height: 1.9; max-width: 320px;
     position: absolute;
     opacity:0; transform: translateY(20px) scale(0.95);
@@ -87,9 +171,13 @@
     padding: 0 10px;
     white-space: pre-line;
   }
-  #s2 .msg.long { font-size: 16px; line-height: 2; }
-  #s2 .msg.show { opacity:1; transform: translateY(0) scale(1); }
-  #s2 .emoji { font-size: 44px; display:block; margin-bottom: 18px; }
+  #s2 .msg.long, #sHackMsg .msg.long { font-size: 16px; line-height: 2; }
+  #s2 .msg.show, #sHackMsg .msg.show { opacity:1; transform: translateY(0) scale(1); }
+  #s2 .emoji, #sHackMsg .emoji { font-size: 44px; display:block; margin-bottom: 18px; }
+
+  #sDosDari h2 { font-size: 22px; line-height: 1.9; font-weight: 500; max-width: 320px; padding: 0 10px; }
+  #sDosDari h2 .emoji { font-size: 50px; display:block; margin-bottom: 20px; }
+
   #s3 h2 { font-size: 19px; margin-bottom: 20px; font-weight: 500; }
   #s3 .sub { font-size: 13px; opacity: 0.6; margin-bottom: 22px; }
   #answer {
@@ -139,6 +227,14 @@
   </p>
 </div>
 
+<!-- هشدار بستن -->
+<div id="exitWarning">
+  <div class="emoji">😏</div>
+  <h2>کجا؟!</h2>
+  <p>هنوز تموم نشده...<br>بمون ببین چی برات دارم 💕</p>
+  <button class="stay-btn" id="stayBtn">باشه، می‌مونم 😊</button>
+</div>
+
 <div id="floatingHearts"></div>
 <canvas id="confetti"></canvas>
 
@@ -150,9 +246,25 @@
 
 <div class="scene hidden" id="s2"></div>
 
+<!-- صحنه‌ی هک -->
+<div class="scene hidden" id="hacked">
+  <div class="skull">💀</div>
+  <div class="glitch-text">HACKED</div>
+  <div class="hack-lines" id="hackLines"></div>
+  <div class="flicker"></div>
+</div>
+
+<!-- صحنه‌ی پیام بعد از هک -->
+<div class="scene hidden" id="sHackMsg"></div>
+
+<!-- صفحه‌ی خب الان دوست داری چی بگم -->
+<div class="scene hidden" id="sDosDari">
+  <h2><span class="emoji">👀</span>خب الان دوست داری چی بگم؟</h2>
+</div>
+
 <div class="scene hidden" id="s3">
-  <h2>خب... بنویس ببینم 😏</h2>
-  <div class="sub">جوابت مستقیم میاد برام 💌</div>
+  <h2>بنویس ببینم چی تو دلت هست 😏</h2>
+  <div class="sub">هکرت داره می‌خونه 👀</div>
   <textarea id="answer" placeholder="اینجا بنویس..."></textarea>
   <button class="send-btn" id="sendBtn">بفرست 💘</button>
 </div>
@@ -170,7 +282,7 @@
 // ============================================================
 const TELEGRAM_USERNAME = "najmeh1900";
 
-// ============ پیام‌ها ============
+// ============ پیام‌های اول (قبل از هک) ============
 const messages = [
   {
     emoji: "💌",
@@ -182,28 +294,73 @@ const messages = [
     text: "الان به من فکر کردی\nیا کسی دیگه اومد تو ذهنت؟"
   },
   {
-    emoji: "👀",
-    text: "خب الان دوس داری چی بگم؟"
+    emoji: "😏",
+    text: "خب الان منتظری من چیزی بگم\nیا خودت فهمیدی گوشیت هک شد؟"
   }
+];
+
+// ============ پیام بعد از هک (با افکت تایپ) ============
+const afterHackMessages = [
+  {
+    emoji: "😌",
+    text: "حالا سکته نکنی\nاین یک احوالپرسی از طرف نجمه جون بود\nباشد که قدر بدانی",
+    long: true
+  }
+];
+
+// ============ متن‌های هک ============
+const hackLines = [
+  "> Accessing device...",
+  "> Bypassing security...",
+  "> Reading messages...",
+  "> Copying contacts...",
+  "> Locating target...",
+  "> DONE. Everything is mine 💀"
 ];
 
 const finalMessage = "جوابت داره میره پیش نجمه،<br>خدا به دادت برسه 😏";
 
-// ============ تشخیص تلگرام / اینستاگرام / ... ============
+// ============ تشخیص تلگرام / اینستاگرام ============
 const ua = navigator.userAgent.toLowerCase();
-const isTelegram = ua.includes("telegram");
-const isInstagram = ua.includes("instagram");
-const isInApp = isTelegram || isInstagram || ua.includes("fbav") || ua.includes("line/");
+const isInApp = ua.includes("telegram") || ua.includes("instagram") || 
+                ua.includes("fbav") || ua.includes("line/");
 
 if (isInApp) {
   document.getElementById("tgWarning").classList.add("show");
-  // جلوگیری از اجرای بقیه‌ی اسکریپت
   throw new Error("In-app browser detected");
 }
+
+// ============ هشدار بستن ============
+let storyFinished = false;
+
+window.addEventListener("beforeunload", (e) => {
+  if (!storyFinished) {
+    e.preventDefault();
+    e.returnValue = "";
+    return "";
+  }
+});
+
+history.pushState({ page: "surprise" }, "", "");
+window.addEventListener("popstate", () => {
+  if (!storyFinished) {
+    history.pushState({ page: "surprise" }, "", "");
+    document.getElementById("exitWarning").classList.add("show");
+    vibrate([80, 40, 80]);
+  }
+});
+
+document.getElementById("stayBtn").addEventListener("click", () => {
+  document.getElementById("exitWarning").classList.remove("show");
+  vibrate([30, 50, 30]);
+});
 
 // ============ کد اصلی ============
 const s1 = document.getElementById("s1");
 const s2 = document.getElementById("s2");
+const sHacked = document.getElementById("hacked");
+const sHackMsg = document.getElementById("sHackMsg");
+const sDosDari = document.getElementById("sDosDari");
 const s3 = document.getElementById("s3");
 const finalScene = document.getElementById("final");
 
@@ -256,9 +413,7 @@ function burstHearts(x, y) {
   }
 }
 
-document.addEventListener("click", (e) => {
-  burstHearts(e.clientX, e.clientY);
-});
+document.addEventListener("click", (e) => burstHearts(e.clientX, e.clientY));
 document.addEventListener("touchstart", (e) => {
   const t = e.touches[0];
   burstHearts(t.clientX, t.clientY);
@@ -273,26 +428,22 @@ function start() {
   setTimeout(() => { showScene(s2); showMessages(); }, 600);
 }
 
-// ============ نمایش پیام‌ها با افکت تایپ ============
-function showMessages() {
+// ============ تابع عمومی نمایش پیام‌ها با تایپ ============
+function playMessages(scene, msgList, onDone) {
   let i = 0;
   const next = () => {
-    if (i >= messages.length) {
-      setTimeout(() => {
-        hideScene(s2);
-        setTimeout(() => { showScene(s3); }, 600);
-      }, 1200);
+    if (i >= msgList.length) {
+      setTimeout(onDone, 1200);
       return;
     }
-    const m = messages[i];
+    const m = msgList[i];
     const el = document.createElement("div");
     el.className = "msg" + (m.long ? " long" : "");
     el.innerHTML = `<span class="emoji">${m.emoji}</span><span class="text"></span>`;
-    s2.appendChild(el);
+    scene.appendChild(el);
     vibrate(30);
     requestAnimationFrame(() => setTimeout(() => el.classList.add("show"), 50));
 
-    // افکت تایپ
     const textSpan = el.querySelector(".text");
     let charIdx = 0;
     const typeChar = () => {
@@ -304,7 +455,6 @@ function showMessages() {
     };
     setTimeout(typeChar, 500);
 
-    // مدت تایپ + مکث بعدش
     const typingTime = m.text.length * 70 + 500;
     const pauseAfterTyping = m.long ? 3500 : 2500;
     const showTime = typingTime + pauseAfterTyping;
@@ -318,6 +468,67 @@ function showMessages() {
     setTimeout(next, showTime + 500);
   };
   next();
+}
+
+// ============ نمایش پیام‌های اول ============
+function showMessages() {
+  playMessages(s2, messages, () => {
+    hideScene(s2);
+    setTimeout(showHackedScene, 700);
+  });
+}
+
+// ============ صحنه‌ی هک ============
+function showHackedScene() {
+  showScene(sHacked);
+
+  // لرزش شدید هکری
+  vibrate([100, 50, 100, 50, 200, 50, 400]);
+
+  const container = document.getElementById("hackLines");
+  container.innerHTML = "";
+  let i = 0;
+
+  const typeLine = () => {
+    if (i < hackLines.length) {
+      const line = document.createElement("div");
+      line.textContent = hackLines[i];
+      line.style.opacity = "0";
+      container.appendChild(line);
+      requestAnimationFrame(() => {
+        line.style.transition = "opacity 0.3s";
+        line.style.opacity = "1";
+      });
+      vibrate(30);
+      i++;
+      setTimeout(typeLine, 400);
+    }
+  };
+  setTimeout(typeLine, 600);
+
+  // بعد از تموم شدن → پیام بعد از هک
+  const totalTime = 600 + hackLines.length * 400 + 1200;
+  setTimeout(() => {
+    hideScene(sHacked);
+    setTimeout(showHackMsg, 700);
+  }, totalTime);
+}
+
+// ============ پیام بعد از هک ============
+function showHackMsg() {
+  showScene(sHackMsg);
+  playMessages(sHackMsg, afterHackMessages, () => {
+    hideScene(sHackMsg);
+    setTimeout(() => {
+      showScene(sDosDari);
+      vibrate([30, 50, 30]);
+      // بعد از ۳ ثانیه برو به صفحه‌ی تایپ جواب
+      setTimeout(() => {
+        hideScene(sDosDari);
+        setTimeout(() => showScene(s3), 700);
+      }, 3000);
+    }, 700);
+  });
 }
 
 // ============ ارسال جواب ============
@@ -349,6 +560,7 @@ document.getElementById("sendBtn").addEventListener("click", () => {
 
     goBtn.onclick = (e) => {
       e.preventDefault();
+      storyFinished = true;
       window.location.href = tgUrl;
       setTimeout(() => { window.location.href = webUrl; }, 800);
     };
